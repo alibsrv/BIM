@@ -1,34 +1,24 @@
-# Encounter-Driven Clinic Management REST API
+# Readers Haven Inventory Management REST API
 
 ## Project Overview
-This project is a Django-based REST API for a health clinic. It manages:
-- Patient registration
-- Appointment booking and completion
-- Clinical workflow (medical records and prescriptions)
-- Billing and insurance claims
+This project is a Django-based REST API designed for independent bookstores to transition from manual ledgers to an automated digital system. It manages:
+- Book inventory tracking
+- Dynamic relational author profiling
+- Advanced, automated search filtering
 
-The API is implemented with a **Thin Views / Fat Managers** architecture. Views only parse HTTP/JSON and return `JsonResponse`, while business rules live in `ClinicManager`.
+The API is implemented with a highly scalable architecture using Django REST Framework, featuring custom serialization logic to prevent duplicate database entries and "Zero-Touch" dynamic filters for future-proof searching.
 
 ## Technical Stack
-- **Backend Framework:** Django
-- **Database:** SQLite
-- **Architecture Pattern:** Service Layer (`ClinicManager`)
-- **API Style:** Function-based Django views with JSON-only responses
+- **Backend Framework:** Django & Django REST Framework (DRF)
+- **Database:** SQLite (Development)
+- **Architecture Pattern:** Function/Class-based Django views with JSON responses
+- **Testing:** Django `APITestCase`
 
-## UML Alignment (Encounter-Driven Architecture)
-The implementation follows an encounter-driven model where `Appointment` is the operational hub:
-- `Appointment` aggregates:
-  - `Bill` (one-to-one)
-  - `MedicalRecord` (one-to-one)
-  - `Prescription` (one-to-many)
-- `Bill` aggregates:
-  - `InsuranceClaim` (one-to-one)
-- `Patient` composes:
-  - `InsurancePolicy` (one-to-one)
-- `InsurancePolicy` references:
-  - `InsuranceProvider` (many-to-one)
-
-This ensures billing and clinical artifacts are generated from clinical encounters, not attached directly as independent records on `Patient`.
+## UML Alignment (Relational Architecture)
+The implementation follows a normalized relational database model to ensure data integrity:
+- `Author` exists as an independent entity.
+- `Book` is the dependent entity.
+- **One-to-Many Relationship:** One `Author` can write multiple `Books`. The system automatically spans this relationship during queries, ensuring that updating an author's name once cascades perfectly across their entire library of books.
 
 ## Downloading from GitHub
 To get a copy of this project on your local machine, you will first need to clone the repository using Git.
