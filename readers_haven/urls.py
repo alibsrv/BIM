@@ -7,4 +7,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # This routes all /api/ traffic to your inventory app
     path('api/', include('inventory.urls')), 
+    
 ]

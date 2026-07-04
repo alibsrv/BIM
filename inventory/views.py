@@ -5,6 +5,59 @@ from rest_framework import status
 from .models import Book
 from .serializers import BookSerializer
 
+class BulkBookInventoryView(APIView):
+    """
+    Handles highly efficient bulk addition and deletion for the Grand Sale.
+    """
+    
+    def post(self, request):
+        # 1. Ensure the incoming data is a list (array) of books
+        if not isinstance(request.data, list):
+            return Response(
+                {"error": "Expected a list of book objects."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # 2. Validate the entire list at once
+        serializer = BookSerializer(data=request.data, many=True)
+        if serializer.is_valid():
+            # 3. Create instances in memory (does not hit database yet)
+            books_to_create = [Book(**item) for item in serializer.validated_data]
+            
+            # 4. Execute a single, highly efficient SQL batch insert
+            Book.objects.bulk_create(books_to_create)
+            
+            return Response(
+                {"message": f"Successfully added {len(books_to_create)} books in bulk."}, 
+                status=status.HTTP_201_CREATED
+            )
+            
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def delete(self, request):
+        # 1. Expecting a JSON body like: }
+        book_ids = request.data.get('ids')
+        
+        if not book_ids or not isinstance(book_ids, list):
+            return Response(
+                {"error": "Expected a list of book IDs under the 'ids' key."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # 2. Execute a single SQL transaction: DELETE WHERE id IN (...)
+        deleted_count, _ = Book.objects.filter(id__in=book_ids).delete()
+        
+        if deleted_count == 0:
+            return Response(
+                {"message": "No books found matching those IDs."}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+            
+        return Response(
+            {"message": f"Successfully deleted {deleted_count} books in bulk."}, 
+            status=status.HTTP_200_OK
+        )
 class BookInventoryView(APIView):
     def get(self, request):
         # Start with the full list of books
