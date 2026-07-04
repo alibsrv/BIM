@@ -2,7 +2,7 @@ from django.db import models
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Book
+from .models import Book, Author
 from .serializers import BookSerializer
 
 class BulkBookInventoryView(APIView):
@@ -11,18 +11,28 @@ class BulkBookInventoryView(APIView):
     """
     
     def post(self, request):
-        # 1. Ensure the incoming data is a list (array) of books
         if not isinstance(request.data, list):
             return Response(
                 {"error": "Expected a list of book objects."}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # 2. Validate the entire list at once
         serializer = BookSerializer(data=request.data, many=True)
         if serializer.is_valid():
-            # 3. Create instances in memory (does not hit database yet)
-            books_to_create = [Book(**item) for item in serializer.validated_data]
+            books_to_create = []
+            
+            for item in serializer.validated_data:
+                # 1. Extract the string name from the data
+                author_name = item.pop('author_name', None)
+                
+                # 2. Get the existing Author, or create a new one if they don't exist
+                if author_name:
+                    author_obj, created = Author.objects.get_or_create(name=author_name)
+                    # Assign the actual database object to the book's foreign key
+                    item['author'] = author_obj
+                
+                # 3. Create the Book instance in memory
+                books_to_create.append(Book(**item))
             
             # 4. Execute a single, highly efficient SQL batch insert
             Book.objects.bulk_create(books_to_create)

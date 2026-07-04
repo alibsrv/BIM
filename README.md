@@ -1,29 +1,49 @@
-# Readers Haven Inventory Management REST API
+# Readers Haven Inventory Management System
 
 ## Project Overview
-This project is a Django-based REST API designed for independent bookstores to transition from manual ledgers to an automated digital system. It manages:
-- Book inventory tracking
-- Dynamic relational author profiling
-- Advanced, automated search filtering
+This project is an API-driven digital inventory management system built for "Readers Haven." It transitions a manual bookkeeping process into a scalable, highly efficient Django REST API. Developed as part of the Programming Clinic at Lancaster University Leipzig.
 
-The API is implemented with a highly scalable architecture using Django REST Framework, featuring custom serialization logic to prevent duplicate database entries and "Zero-Touch" dynamic filters for future-proof searching.
+### Key Features
+* **Full CRUD Operations:** Create, Read, Update, and Delete individual book and author records.
+* **Dynamic Search & Filtering:** Case-insensitive search capabilities and advanced sorting (alphabetical, price ascending/descending) using `__icontains` and Django's `order_by`.
+* **High-Efficiency Bulk Operations:** Dedicated batch processing endpoints utilizing `bulk_create` and `id__in` SQL transactions to safely handle massive data payloads without system lag during bi-annual grand sales.
 
-## Technical Stack
-- **Backend Framework:** Django & Django REST Framework (DRF)
-- **Database:** SQLite (Development)
-- **Architecture Pattern:** Function/Class-based Django views with JSON responses
-- **Testing:** Django `APITestCase`
+## Technologies Used
+* Python 3.10+
+* Django 5.0.6
+* Django REST Framework 3.15.1
+* SQLite / PostgreSQL
 
-## UML Alignment (Relational Architecture)
-The implementation follows a normalized relational database model to ensure data integrity:
-- `Author` exists as an independent entity.
-- `Book` is the dependent entity.
-- **One-to-Many Relationship:** One `Author` can write multiple `Books`. The system automatically spans this relationship during queries, ensuring that updating an author's name once cascades perfectly across their entire library of books.
+## Setup & Installation
 
-## Downloading from GitHub
-To get a copy of this project on your local machine, you will first need to clone the repository using Git.
+**1. Clone the repository**
+```bash
+git clone <https://github.com/alibsrv/BIM>
+cd readers_haven_project
 
-1. **Clone the repository:**
-   Open your terminal and run the following command to download the code:
-   ```bash
-   git clone [https://github.com/alibsrv/BIM.git](https://github.com/alibsrv/BIM.git)
+
+## Key Features
+* **Full CRUD Operations:** Create, Read, Update, and Delete individual book and author records.
+* **Dynamic Search & Filtering:** 
+    * **Search:** Supports partial name matching (e.g., search for "Dune" using just "Du"). Uses case-insensitive matching (`__icontains`) for a user-friendly experience.
+    * **Sorting:** Supports ascending and descending price/title sorting using query parameters.
+* **High-Efficiency Bulk Operations:** Dedicated batch processing endpoints utilizing `bulk_create` to handle large data payloads during grand sales.
+
+## API Usage Guide
+You can test the search and sorting features directly in your browser or Postman by appending query parameters to the inventory URL: `http://127.0.0.1:8000/api/books/inventory/`
+
+### 1. Search Functionality
+Use the `search` parameter to filter books by title. The search is case-insensitive and partial-match capable.
+* **Example:** `http://127.0.0.1:8000/api/books/inventory/?search=Dune`
+* **Example (Partial):** `http://127.0.0.1:8000/api/books/inventory/?search=Du`
+
+### 2. Sorting Functionality
+Use the `sort` parameter to reorder the inventory.
+* **Price Ascending:** `http://127.0.0.1:8000/api/books/inventory/?sort=price`
+* **Price Descending:** `http://127.0.0.1:8000/api/books/inventory/?sort=-price`
+* **Title Alphabetical:** `http://127.0.0.1:8000/api/books/inventory/?sort=title`
+* **Title Reverse Alphabetical:** `http://127.0.0.1:8000/api/books/inventory/?sort=-title`
+
+### 3. Combining Parameters
+You can combine search and sorting to refine your view further.
+* **Example:** `http://127.0.0.1:8000/api/books/inventory/?search=Foundation&sort=-price`

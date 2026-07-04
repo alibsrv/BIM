@@ -7,5 +7,4 @@ urlpatterns = [
     path('api/books/<int:pk>/', BookDetailView.as_view(), name='book-detail'),
     
     # NEW: Make sure this is added right below the others!
-    path('bulk/', BulkBookInventoryView.as_view(), name='book-bulk'),
-]
+path('books/bulk/', BulkBookInventoryView.as_view(), name='book-bulk')]

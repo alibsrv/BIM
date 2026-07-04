@@ -1,0 +1,213 @@
+{
+  "info": {
+    "_postman_id": "3ca90e5e-c43f-4e1f-8250-15757f0b6fd3",
+    "name": "BIM Week 1 - Readers Haven (with assertions)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52668249",
+    "_collection_link": "https://go.postman.co/collection/52668249-3ca90e5e-c43f-4e1f-8250-15757f0b6fd3?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "REQ1 - Add Book + Author",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
+              "const b = pm.response.json();",
+              "pm.test('Returns saved book data', () => { pm.expect(b.data).to.have.property('title', 'The Hobbit'); });",
+              "pm.test('Author linked correctly', () => { pm.expect(b.data.author).to.eql('J.R.R. Tolkien'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"The Hobbit\",\n  \"price\": \"15.50\",\n  \"author_name\": \"J.R.R. Tolkien\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/books/add/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "books",
+            "add",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "REQ1b - Reject Invalid Book (missing author)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 400 Bad Request', () => pm.response.to.have.status(400));",
+              "pm.test('Explains the error', () => pm.expect(pm.response.json()).to.have.property('error'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"No Author Book\",\n  \"price\": \"10.00\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/books/add/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "books",
+            "add",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "REQ2 - Retrieve Entire Inventory",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Returns a JSON array', () => pm.expect(pm.response.json()).to.be.an('array'));",
+              "pm.test('Contains at least one book', () => pm.expect(pm.response.json().length).to.be.above(0));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/books/inventory/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "books",
+            "inventory",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "REQ3 - Filter Books by Author",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "const books = pm.response.json();",
+              "pm.test('Every result is by the searched author', () => {",
+              "  books.forEach(bk => pm.expect(bk.author).to.include('Tolkien'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/books/inventory/?author=Tolkien",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "books",
+            "inventory",
+            ""
+          ],
+          "query": [
+            {
+              "key": "author",
+              "value": "Tolkien"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "REQ3b - Filter by Non-existent Author",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Returns an empty list (no matches)', () => pm.expect(pm.response.json()).to.eql([]));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/books/inventory/?author=Nobody",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "books",
+            "inventory",
+            ""
+          ],
+          "query": [
+            {
+              "key": "author",
+              "value": "Nobody"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    }
+  ]
+}
